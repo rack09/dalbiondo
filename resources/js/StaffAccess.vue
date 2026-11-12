@@ -2,7 +2,10 @@
 import { onMounted, ref } from 'vue';
 import StaffMenu from './StaffMenu.vue';
 
+import StaffInvitations from './StaffInvitations.vue';
+
 import { readCsrfToken } from './csrf.js';
+
 
 const user = ref(null);
 const email = ref('');
@@ -29,7 +32,7 @@ async function updateSession(method) {
 
         if (method !== 'GET') {
             const token = readCsrfToken();
-            
+
 
             if (!token) {
                 error.value = 'Ricarica la pagina e riprova.';
@@ -130,6 +133,7 @@ onMounted(() => updateSession('GET'));
             </form>
 
             <StaffMenu v-if="user" />
+            <StaffInvitations v-if="user?.role === 'owner'" />
 
             <a href="/" class="d-inline-block mt-3">Torna al menù</a>
         </div>

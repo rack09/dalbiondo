@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('staff_invitations', function (Blueprint $table) {
             $table->id();
+            $table->string('email')->unique();
+            $table->char('token_hash', 64)->unique();
+            $table->dateTime('expires_at');
+            $table->dateTime('accepted_at')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('staff_invitations');
