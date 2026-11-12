@@ -16,6 +16,7 @@ Route::prefix('api')->group(function () {
         Route::get('/session', [SessionController::class, 'show']);
         Route::delete('/session', [SessionController::class, 'destroy']);
         Route::get('/staff/pizzas', [StaffPizzaController::class, 'index']);
+        Route::post('/staff/pizzas', [StaffPizzaController::class, 'store']);
         Route::patch('/staff/pizzas/{pizza}', [StaffPizzaController::class, 'update']);
     });
 });
