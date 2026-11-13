@@ -8,6 +8,7 @@ import "../css/dal-biondo.css";
 
 import "bootstrap/js/dist/modal";
 import PublicPizzaList from "./PublicPizzaList.vue";
+import PublicStory from "./PublicStory.vue";
 
 const openingState = ref("unknown");
 
@@ -93,6 +94,9 @@ onMounted(async () => {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#ordinare">Come ordinare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#storia">La nostra storia</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#orari">Orari</a>
@@ -316,6 +320,8 @@ onMounted(async () => {
                 </div>
             </div>
         </section>
+
+        <PublicStory />
 
         <section
             id="contatti"
