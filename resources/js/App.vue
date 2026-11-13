@@ -9,7 +9,7 @@ import "../css/dal-biondo.css";
 import "bootstrap/js/dist/modal";
 import PublicPizzaList from "./PublicPizzaList.vue";
 import PublicStory from "./PublicStory.vue";
-import PublicReviews from './PublicReviews.vue';
+import PublicReviews from "./PublicReviews.vue";
 
 const openingState = ref("unknown");
 
@@ -323,7 +323,7 @@ onMounted(async () => {
         </section>
 
         <PublicReviews />
-        
+
         <PublicStory />
 
         <section
@@ -366,4 +366,25 @@ onMounted(async () => {
             </div>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <div
+            class="container d-flex flex-wrap align-items-center justify-content-between gap-3"
+        >
+            <a class="footer-brand text-decoration-none" href="#inizio">
+                Dal Biondo <span>· Pizza al trancio dal 1998</span>
+            </a>
+
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <a class="text-link" href="/area-riservata"> Area riservata </a>
+
+                <span class="small text-body-secondary">
+                    Sviluppato da
+                    <a class="text-link" href="https://melvinrosales.com/"
+                        >Melvin Rosales</a
+                    >
+                </span>
+            </div>
+        </div>
+    </footer>
 </template>
