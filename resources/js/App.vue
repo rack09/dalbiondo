@@ -94,6 +94,9 @@ onMounted(async () => {
                     <li class="nav-item">
                         <a class="nav-link" href="#orari">Orari</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contatti">Dove siamo</a>
+                    </li>
                     <li class="nav-item ms-md-3">
                         <a class="nav-link phone-nav" href="tel:+390266040662"
                             >02 6604 0662</a
@@ -274,11 +277,44 @@ onMounted(async () => {
             </div>
         </section>
 
-        <div class="container pb-5">
-            <PublicOpeningHours
-                id="orari"
-                @status-change="openingState = $event"
-            />
-        </div>
+        <section
+            id="contatti"
+            class="contact-section section-pad"
+            aria-labelledby="contact-title"
+        >
+            <div class="container">
+                <div class="row gy-5 gx-lg-5">
+                    <div class="col-lg-5">
+                        <h2 id="contact-title">Dove siamo</h2>
+
+                        <address>
+                            Via Sant’Antonio 13<br />
+                            20092 Cinisello Balsamo (MI)
+                        </address>
+
+                        <a
+                            class="text-link"
+                            href="https://www.google.com/maps/place/Pizza+Al+Trancio+Dal+Biondo/@45.55222,9.2225842,17z/data=!3m1!4b1!4m6!3m5!1s0x4786b8c867cb1fab:0xa2150dd7150b54c1!8m2!3d45.55222!4d9.2225842!16s%2Fg%2F11ddwxwltz?entry=ttu"
+                        >
+                            Indicazioni su Google Maps
+                        </a>
+                    </div>
+
+                    <div class="col-lg-6 offset-lg-1">
+                        <PublicOpeningHours
+                            id="orari"
+                            @status-change="openingState = $event"
+                        />
+
+                        <a
+                            class="contact-phone d-inline-block text-decoration-none"
+                            href="tel:+390266040662"
+                        >
+                            02 6604 0662
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 </template>

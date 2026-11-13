@@ -87,8 +87,8 @@ onUnmounted(() => window.clearInterval(timerId));
 </script>
 
 <template>
-    <section class="mt-5" aria-labelledby="public-hours-title">
-        <h2 id="public-hours-title" class="h4 mb-3">Orari di apertura</h2>
+    <section class="hours-column" aria-labelledby="public-hours-title">
+        <h3 id="public-hours-title">Orari di apertura</h3>
 
         <p v-if="loading" role="status">Caricamento degli orari…</p>
         <p v-else-if="error" class="alert alert-danger" role="alert">
@@ -96,31 +96,33 @@ onUnmounted(() => window.clearInterval(timerId));
         </p>
         <p v-else-if="week.length === 0">Orari in aggiornamento.</p>
 
-        <template v-else>
-            <dl class="list-group mb-0">
-                <div
-                    v-for="day in week"
-                    :key="day.weekday"
-                    class="list-group-item"
-                >
-                    <dt class="text-capitalize">
-                        {{ dayNames[day.weekday - 1] }}
-                    </dt>
-                    <dd class="mb-0">
-                        <template v-if="day.periods.length">
-                            {{
-                                day.periods
-                                    .map(
-                                        (period) =>
-                                            `${period.opens_at}–${period.closes_at}`,
-                                    )
-                                    .join(" / ")
-                            }}
-                        </template>
-                        <template v-else>Chiuso</template>
-                    </dd>
-                </div>
-            </dl>
-        </template>
+        <dl v-else class="hours-list">
+            <div
+                v-for="day in week"
+                :key="day.weekday"
+                class="d-flex align-items-baseline justify-content-between gap-3 border-bottom"
+            >
+                <dt class="fw-normal text-capitalize">
+                    {{ dayNames[day.weekday - 1] }}
+                </dt>
+                <dd class="mb-0 text-end">
+                    <template v-if="day.periods.length">
+                        <div
+                            v-for="period in day.periods"
+                            :key="period.opens_at"
+                        >
+                            <time :datetime="period.opens_at">{{
+                                period.opens_at
+                            }}</time>
+                            –
+                            <time :datetime="period.closes_at">{{
+                                period.closes_at
+                            }}</time>
+                        </div>
+                    </template>
+                    <span v-else class="text-primary">Chiuso</span>
+                </dd>
+            </div>
+        </dl>
     </section>
 </template>
