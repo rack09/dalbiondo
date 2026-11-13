@@ -134,7 +134,7 @@ onMounted(() => updateSession('GET'));
                 </fieldset>
             </form>
 
-            <StaffMenu v-if="user" />
+            <StaffMenu v-if="user" :can-manage-featured="user.role === 'owner'" />
             <StaffOpeningHours v-if="user" />
             <StaffInvitations v-if="user?.role === 'owner'" />
 

@@ -25,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-collaborators', function (User $user): bool {
             return $user->role === 'owner';
         });
+        Gate::define('manage-featured-pizzas', fn (User $user): bool => $user->role === 'owner');
     }
 }

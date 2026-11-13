@@ -12,6 +12,8 @@ class Pizza extends Model
     {
         return [
             'is_visible' => 'boolean',
+            'is_featured' => 'boolean',
+            'is_house_pizza' => 'boolean',
         ];
     }
 }

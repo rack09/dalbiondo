@@ -21,6 +21,8 @@ class PizzaController extends Controller
                 'ingredients',
                 'price_trancio',
                 'price_teglia',
+                'is_featured',
+                'is_house_pizza',
             ]);
 
         return response()->json($pizzas);

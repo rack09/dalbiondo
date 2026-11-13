@@ -27,7 +27,10 @@ Route::prefix('api')->group(function () {
         Route::post('/staff/pizzas', [StaffPizzaController::class, 'store']);
         Route::post('/staff/invitations', [StaffInvitationController::class, 'store'])
         ->can('manage-collaborators');
+
         Route::patch('/staff/pizzas/{pizza}', [StaffPizzaController::class, 'update']);
+        Route::patch('/staff/pizzas/{pizza}/featured', [StaffPizzaController::class, 'updateFeatured'])
+        ->can('manage-featured-pizzas');
 
         Route::put('/staff/opening-hours/{openingHour:weekday}', [OpeningHourController::class, 'update'])
         ->where('openingHour', '[1-7]');
