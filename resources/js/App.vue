@@ -9,6 +9,14 @@ import "../css/dal-biondo.css";
 import "bootstrap/js/dist/modal";
 import PublicPizzaList from "./PublicPizzaList.vue";
 
+const openingState = ref("unknown");
+
+const openingLabels = {
+    unknown: "Consulta gli orari",
+    open: "Aperto ora",
+    closed: "Chiuso ora",
+};
+
 const pizzas = ref([]);
 
 const previewPizzas = computed(() => {
@@ -132,10 +140,30 @@ onMounted(async () => {
                         </p>
 
                         <a
-                            class="opening-status d-inline-flex align-items-center"
+                            class="opening-status d-inline-flex align-items-center text-decoration-none"
                             href="#orari"
+                            :data-state="openingState"
                         >
-                            Consulta gli orari
+                            <span
+                                class="opening-dot flex-shrink-0 rounded-circle"
+                                aria-hidden="true"
+                            ></span>
+                            <span
+                                class="opening-copy"
+                                aria-live="polite"
+                                aria-atomic="true"
+                            >
+                                <strong>{{
+                                    openingLabels[openingState]
+                                }}</strong>
+                            </span>
+                            <svg
+                                class="opening-chevron flex-shrink-0"
+                                aria-hidden="true"
+                                viewBox="0 0 16 16"
+                            >
+                                <path d="m4 6 4 4 4-4" />
+                            </svg>
                         </a>
                         <div class="hero-actions d-flex flex-wrap gap-3">
                             <a class="btn btn-primary" href="#menu"
@@ -247,7 +275,10 @@ onMounted(async () => {
         </section>
 
         <div class="container pb-5">
-            <PublicOpeningHours id="orari" />
+            <PublicOpeningHours
+                id="orari"
+                @status-change="openingState = $event"
+            />
         </div>
     </main>
 </template>
