@@ -6,6 +6,8 @@ import StaffInvitations from './StaffInvitations.vue';
 
 import { readCsrfToken } from './csrf.js';
 
+import StaffOpeningHours from './StaffOpeningHours.vue';
+
 
 const user = ref(null);
 const email = ref('');
@@ -133,6 +135,7 @@ onMounted(() => updateSession('GET'));
             </form>
 
             <StaffMenu v-if="user" />
+            <StaffOpeningHours v-if="user" />
             <StaffInvitations v-if="user?.role === 'owner'" />
 
             <a href="/" class="d-inline-block mt-3">Torna al menù</a>

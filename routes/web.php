@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\StaffInvitationController;
 
 use App\Http\Controllers\Api\StaffRegistrationController;
 
+use App\Http\Controllers\Api\OpeningHourController;
+
 Route::get('/', function () {
     return view('app');
 });
@@ -26,6 +28,9 @@ Route::prefix('api')->group(function () {
         Route::post('/staff/invitations', [StaffInvitationController::class, 'store'])
         ->can('manage-collaborators');
         Route::patch('/staff/pizzas/{pizza}', [StaffPizzaController::class, 'update']);
+
+        Route::put('/staff/opening-hours/{openingHour:weekday}', [OpeningHourController::class, 'update'])
+        ->where('openingHour', '[1-7]');
     });
 });
 

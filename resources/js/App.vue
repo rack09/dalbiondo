@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
+import PublicOpeningHours from './PublicOpeningHours.vue';
+
 const pizzas = ref([]);
 const loading = ref(true);
 const error = ref('');
@@ -46,5 +48,7 @@ onMounted(async () => {
                 </p>
             </li>
         </ul>
+        
+        <PublicOpeningHours />
     </main>
 </template>

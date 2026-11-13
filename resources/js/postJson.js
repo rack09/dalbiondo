@@ -7,7 +7,7 @@ const messages = {
     429: 'Troppi tentativi. Riprova tra un minuto.',
 };
 
-export async function postJson(url, values) {
+export async function sendJson(url, values, method = 'POST') {
     const csrf = readCsrfToken();
 
     if (!csrf) {
@@ -15,7 +15,7 @@ export async function postJson(url, values) {
     }
 
     const response = await fetch(url, {
-        method: 'POST',
+        method,
         credentials: 'same-origin',
         headers: {
             Accept: 'application/json',
@@ -42,3 +42,5 @@ export async function postJson(url, values) {
 
     return data;
 }
+
+export { sendJson as postJson };
