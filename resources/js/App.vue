@@ -92,6 +92,9 @@ onMounted(async () => {
                         <a class="nav-link" href="#menu">Il menù</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#ordinare">Come ordinare</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#orari">Orari</a>
                     </li>
                     <li class="nav-item">
@@ -273,6 +276,43 @@ onMounted(async () => {
                             </div>
                         </Teleport>
                     </template>
+                </div>
+            </div>
+        </section>
+
+        <section
+            id="ordinare"
+            class="order-section"
+            aria-labelledby="order-title"
+        >
+            <div
+                class="container order-strip d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 gap-md-4 text-center text-md-start"
+            >
+                <h2 id="order-title" class="mb-0">Hai scelto la tua pizza?</h2>
+
+                <div
+                    class="order-actions d-flex flex-column flex-sm-row flex-shrink-0 gap-2 gap-sm-3"
+                >
+                    <a class="btn btn-primary" href="tel:+390266040662">
+                        Chiama per ordinare
+                        <span class="arrow" aria-hidden="true">
+                            <svg viewBox="0 0 16 16">
+                                <path d="M3 13 13 3M4 3h9v9" />
+                            </svg>
+                        </span>
+                    </a>
+
+                    <a
+                        class="btn btn-outline-primary"
+                        href="https://www.justeat.it/restaurants-pizzeriaaltranciodalbiondo/menu"
+                    >
+                        Ordina su Just Eat
+                        <span class="arrow" aria-hidden="true">
+                            <svg viewBox="0 0 16 16">
+                                <path d="M3 13 13 3M4 3h9v9" />
+                            </svg>
+                        </span>
+                    </a>
                 </div>
             </div>
         </section>
