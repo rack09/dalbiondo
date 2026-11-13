@@ -9,6 +9,7 @@ import "../css/dal-biondo.css";
 import "bootstrap/js/dist/modal";
 import PublicPizzaList from "./PublicPizzaList.vue";
 import PublicStory from "./PublicStory.vue";
+import PublicReviews from './PublicReviews.vue';
 
 const openingState = ref("unknown");
 
@@ -321,6 +322,8 @@ onMounted(async () => {
             </div>
         </section>
 
+        <PublicReviews />
+        
         <PublicStory />
 
         <section
