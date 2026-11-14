@@ -11,6 +11,8 @@ import PublicPizzaList from "./PublicPizzaList.vue";
 import PublicStory from "./PublicStory.vue";
 import PublicReviews from "./PublicReviews.vue";
 
+const currentYear = new Date().getFullYear();
+
 const openingState = ref("unknown");
 
 const openingLabels = {
@@ -371,9 +373,14 @@ onMounted(async () => {
         <div
             class="container d-flex flex-wrap align-items-center justify-content-between gap-3"
         >
-            <a class="footer-brand text-decoration-none" href="#inizio">
-                Dal Biondo <span>· Pizza al trancio dal 1998</span>
-            </a>
+            <div>
+                <a class="footer-brand text-decoration-none" href="#inizio">
+                    Dal Biondo <span>· Pizza al trancio dal 1998</span>
+                </a>
+                <small class="d-block mt-1"
+                    >© 2007–{{ currentYear }} Dal Biondo</small
+                >
+            </div>
 
             <div class="d-flex flex-wrap align-items-center gap-3">
                 <a class="text-link" href="/area-riservata"> Area riservata </a>
