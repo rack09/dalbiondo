@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { sendJson } from './postJson.js';
 
 const dayNames = [
@@ -15,6 +15,7 @@ const saving = ref(false);
 const loadError = ref('');
 const saveError = ref('');
 const success = ref('');
+const orderedWeek = computed(() => [...week.value].sort((first, second) => first.weekday - second.weekday));
 
 function selectDay(value) {
     const day = week.value.find(item => item.weekday === value);
@@ -40,7 +41,7 @@ onMounted(async () => {
         week.value = await response.json();
 
         if (week.value.length > 0) {
-            selectDay(week.value[0].weekday);
+            selectDay(orderedWeek.value[0].weekday);
         }
     } catch {
         loadError.value = 'Impossibile caricare gli orari. Ricarica la pagina.';
@@ -85,59 +86,98 @@ async function saveDay() {
 </script>
 
 <template>
-    <section class="mt-4">
-        <h2 class="h4 mb-3">Orari</h2>
+    <section>
+        <header class="staff-page-heading">
+            <div>
+                <h1>Orari di apertura</h1>
+                <p>Imposta le fasce di apertura per ogni giorno.</p>
+            </div>
+        </header>
 
         <p v-if="loading" role="status">Caricamento degli orari…</p>
         <p v-else-if="loadError" class="alert alert-danger" role="alert">{{ loadError }}</p>
         <p v-else-if="week.length === 0">Nessun orario configurato.</p>
 
-        <form v-else class="card card-body" @submit.prevent="saveDay" @input="success = ''">
+        <template v-else>
             <p v-if="saveError" class="alert alert-danger" role="alert">{{ saveError }}</p>
             <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
-
-            <fieldset :disabled="saving">
-                <label for="opening-weekday" class="form-label">Giorno</label>
-                <select
-                    id="opening-weekday"
-                    class="form-select mb-3"
-                    :value="weekday"
-                    @change="selectDay(Number($event.target.value))"
-                >
-                    <option v-for="day in week" :key="day.weekday" :value="day.weekday">
-                        {{ dayNames[day.weekday - 1] }}
-                    </option>
-                </select>
-
-                <p v-if="draft.length === 0">Chiuso</p>
-
-                <div v-for="(period, index) in draft" :key="index" class="border rounded p-2 mb-2">
-                    <div class="row g-2">
-                        <label class="col-6 form-label">
-                            Apertura
-                            <input v-model="period.opens_at" type="time" class="form-control" required>
-                        </label>
-                        <label class="col-6 form-label">
-                            Chiusura
-                            <input v-model="period.closes_at" type="time" class="form-control" required>
-                        </label>
-                    </div>
-
-                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                            @click="removePeriod(index)">
-                        Rimuovi fascia
-                    </button>
+            <div class="staff-section-grid">
+                <div class="staff-panel">
+                    <h2>Settimana</h2>
+                    <ul class="staff-week list-unstyled mb-0">
+                        <li v-for="day in orderedWeek" :key="day.weekday" class="staff-day">
+                            <strong>{{ dayNames[day.weekday - 1] }}</strong>
+                            <div class="staff-day-hours">
+                                <span v-if="!day.periods.length">Chiuso</span>
+                                <span v-for="period in day.periods" :key="period.opens_at">
+                                    {{ period.opens_at }}–{{ period.closes_at }}
+                                </span>
+                            </div>
+                            <button
+                                type="button" class="btn btn-outline-secondary btn-sm"
+                                :aria-label="'Modifica ' + dayNames[day.weekday - 1]"
+                                :aria-pressed="weekday === day.weekday"
+                                :disabled="saving" @click="selectDay(day.weekday)"
+                            >Modifica</button>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                    <button type="button" class="btn btn-outline-primary btn-sm" @click="addPeriod">
-                        Aggiungi fascia
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        {{ saving ? 'Salvataggio…' : 'Salva orari' }}
-                    </button>
-                </div>
-            </fieldset>
-        </form>
+                <form class="staff-panel" @submit.prevent="saveDay" @input="success = ''">
+                    <h2>{{ dayNames[weekday - 1] }}</h2>
+                    <fieldset :disabled="saving">
+                        <p v-if="draft.length === 0" class="text-body-secondary">Chiuso</p>
+
+                        <div v-for="(period, index) in draft" :key="index" class="border rounded p-2 mb-2">
+                            <div class="row g-2">
+                                <label class="col-6 form-label">
+                                    Apertura
+                                    <input v-model="period.opens_at" type="time" class="form-control" required>
+                                </label>
+                                <label class="col-6 form-label">
+                                    Chiusura
+                                    <input v-model="period.closes_at" type="time" class="form-control" required>
+                                </label>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="removePeriod(index)">
+                                Rimuovi fascia
+                            </button>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="addPeriod">
+                                Aggiungi fascia
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                {{ saving ? 'Salvataggio…' : 'Salva orari' }}
+                            </button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </template>
     </section>
 </template>
+
+<style scoped>
+.staff-day {
+    display: grid;
+    grid-template-columns: minmax(4.7rem, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem 0;
+    border-top: 1px solid var(--staff-line);
+    font-size: .86rem;
+}
+.staff-day-hours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .2rem .6rem;
+    color: var(--staff-muted);
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+.staff-day-hours span { white-space: nowrap; }
+.staff-day [aria-pressed='true'] { color: var(--staff-gold); background: var(--staff-gold-tint); }
+</style>

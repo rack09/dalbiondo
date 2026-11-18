@@ -2,7 +2,8 @@ import { readCsrfToken } from './csrf.js';
 
 const messages = {
     401: 'Sessione scaduta. Accedi di nuovo.',
-    403: 'Operazione riservata al titolare.',
+    403: 'Non hai il permesso per questa operazione.',
+    409: 'I dati sono cambiati. Riprova.',
     419: 'Sessione scaduta. Ricarica la pagina.',
     429: 'Troppi tentativi. Riprova tra un minuto.',
 };

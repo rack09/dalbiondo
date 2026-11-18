@@ -1,36 +1,28 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
-const photos = [
-    {
-        file: "staff-storico.webp",
-        width: 1350,
-        height: 1080,
-        caption: "Foto storica dello staff",
-        alt: "Tre persone dietro il banco, davanti al forno della pizzeria.",
-    },
-    {
-        file: "staff-archivio-2.webp",
-        width: 1024,
-        height: 768,
-        caption: "Ricordi dietro il banco",
-        alt: "Quattro persone dietro il banco, con arancini e panzerotti in vetrina.",
-    },
-    {
-        file: "staff-archivio-3.webp",
-        width: 768,
-        height: 1024,
-        caption: "Volti di Dal Biondo",
-        alt: "Due persone dietro il banco, con le scatole della pizza sullo sfondo.",
-    },
-];
-
+const photos = ref([]);
 const photoIndex = ref(0);
-const currentPhoto = computed(() => photos[photoIndex.value]);
+const currentPhoto = computed(() => photos.value[photoIndex.value]);
+
+onMounted(async () => {
+    try {
+        const response = await fetch("/api/staff-photos", {
+            headers: { Accept: "application/json" },
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (Array.isArray(data)) photos.value = data;
+    } catch {
+        // La storia resta leggibile anche quando il catalogo delle foto non risponde.
+    }
+});
 
 function changePhoto(step) {
-    photoIndex.value =
-        (photoIndex.value + step + photos.length) % photos.length;
+    const count = photos.value.length;
+    if (count < 2) return;
+    photoIndex.value = (photoIndex.value + step + count) % count;
 }
 </script>
 
@@ -42,14 +34,14 @@ function changePhoto(step) {
     >
         <div class="container">
             <div class="row gy-4 align-items-center">
-                <div class="col-lg-6">
+                <div v-if="currentPhoto" class="col-lg-6">
                     <figure
                         class="story-photo staff-carousel carousel is-ready"
                     >
                         <div class="carousel-inner">
                             <div class="carousel-item active">
                                 <img
-                                    :src="`/dal-biondo/${currentPhoto.file}`"
+                                    :src="currentPhoto.url"
                                     :alt="currentPhoto.alt"
                                     :width="currentPhoto.width"
                                     :height="currentPhoto.height"
@@ -67,20 +59,24 @@ function changePhoto(step) {
                                 aria-atomic="true"
                             >
                                 <div class="staff-caption-copy">
-                                    <span class="d-block text-primary"
-                                        >Dal nostro album</span
-                                    >
+                                    <span class="d-block text-primary">
+                                        <template v-if="currentPhoto.is_featured">
+                                            <span aria-hidden="true">★</span> Foto in evidenza
+                                        </template>
+                                        <template v-else>Dal nostro album</template>
+                                    </span>
                                     <small class="d-block">{{
                                         currentPhoto.caption
                                     }}</small>
                                 </div>
-                                <span class="staff-counter text-nowrap">
+                                <span v-if="photos.length > 1" class="staff-counter text-nowrap">
                                     Foto {{ photoIndex + 1 }} di
                                     {{ photos.length }}
                                 </span>
                             </div>
 
                             <div
+                                v-if="photos.length > 1"
                                 class="staff-carousel-controls align-items-center justify-content-between gap-2"
                             >
                                 <button
@@ -101,7 +97,7 @@ function changePhoto(step) {
                                 >
                                     <button
                                         v-for="(photo, index) in photos"
-                                        :key="photo.file"
+                                        :key="photo.id"
                                         class="border-0 bg-transparent p-0 text-primary"
                                         type="button"
                                         :aria-label="`Foto ${index + 1}`"
@@ -129,7 +125,7 @@ function changePhoto(step) {
                     </figure>
                 </div>
 
-                <div class="col-lg-5 offset-lg-1 story-copy">
+                <div class="story-copy" :class="currentPhoto ? 'col-lg-5 offset-lg-1' : 'col-12'">
                     <p class="eyebrow text-primary">LE PERSONE DI DAL BIONDO</p>
                     <h2 id="story-title">
                         Dietro ogni trancio,<br />ci siamo noi.
@@ -139,7 +135,7 @@ function changePhoto(step) {
                         Un pezzo della nostra storia.
                     </p>
                     <p class="story-text">
-                        Fotografie del nostro staff, dall’album della pizzeria.
+                        <template v-if="currentPhoto">Fotografie del nostro staff, dall’album della pizzeria.</template>
                         Volti, ricordi e momenti della nostra storia a
                         Cinisello, dal 1998.
                     </p>

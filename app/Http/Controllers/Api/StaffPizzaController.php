@@ -21,6 +21,7 @@ class StaffPizzaController extends Controller
         'price_teglia',
         'is_visible',
         'is_featured',
+        'is_house_pizza',
     ];
 
     public function index(): JsonResponse

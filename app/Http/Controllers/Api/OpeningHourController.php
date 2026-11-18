@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\OpeningHour;
 use Illuminate\Http\JsonResponse;
-
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -15,7 +14,11 @@ class OpeningHourController extends Controller
     {
         $hours = OpeningHour::query()
             ->orderBy('weekday')
-            ->get(['weekday', 'periods']);
+            ->get(['weekday', 'periods'])
+            ->map(fn (OpeningHour $day): array => [
+                'weekday' => $day->weekday,
+                'periods' => $this->mergeAdjacentPeriods($day->periods),
+            ]);
 
         return response()->json($hours);
     }
@@ -54,9 +57,27 @@ class OpeningHourController extends Controller
             $previousClose = $period['closes_at'];
         }
 
-        $openingHour->periods = $periods;
+        $openingHour->periods = $this->mergeAdjacentPeriods($periods);
         $openingHour->save();
 
         return response()->json($openingHour->only(['weekday', 'periods']));
+    }
+
+    private function mergeAdjacentPeriods(array $periods): array
+    {
+        $mergedPeriods = [];
+
+        foreach ($periods as $period) {
+            $previous = array_key_last($mergedPeriods);
+
+            if ($previous !== null && $mergedPeriods[$previous]['closes_at'] === $period['opens_at']) {
+                $mergedPeriods[$previous]['closes_at'] = $period['closes_at'];
+                continue;
+            }
+
+            $mergedPeriods[] = $period;
+        }
+
+        return $mergedPeriods;
     }
 }

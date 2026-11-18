@@ -26,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
             return $user->role === 'owner';
         });
         Gate::define('manage-featured-pizzas', fn (User $user): bool => $user->role === 'owner');
+        Gate::define('manage-site-contact', fn (User $user): bool => in_array($user->role, ['owner', 'collaborator'], true));
+        Gate::define('edit-own-profile', fn (User $user): bool => $user->role === 'collaborator');
+        Gate::define('manage-staff-gallery', fn (User $user): bool => $user->role === 'owner');
     }
 }

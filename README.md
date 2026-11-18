@@ -1,58 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🍕 Dal Biondo
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Menù digitale e area riservata per una pizzeria al trancio di Cinisello Balsamo (MI).**
 
-## About Laravel
+Il personale aggiorna menù, orari, contatti e fotografie dal pannello. I clienti consultano le informazioni aggiornate sul sito, anche da smartphone.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![PHP 8.4.1+](https://img.shields.io/badge/PHP-8.4.1%2B-777BB4?style=flat-square&logo=php&logoColor=white)
+![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel&logoColor=white)
+![Vue 3](https://img.shields.io/badge/Vue-3-42B883?style=flat-square&logo=vuedotjs&logoColor=white)
+![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
+![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+[Demo live](https://dalbiondo.melvinrosales.com/) · [Area riservata](https://dalbiondo.melvinrosales.com/area-riservata)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Per accedere all'area riservata della demo, richiedi la password di prova allo sviluppatore
 
-## Learning Laravel
+Progetto finale del Master in Full Stack Development di **start2impact**.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🌐 Sito pubblico
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Menù** con pizze al trancio e in teglia, pizze rotonde, sfizi e bibite. Le categorie mostrano i prodotti visibili.
+- **Pizze in homepage** con una selezione di massimo sei proposte. La pizza della casa apre la selezione, seguita dalle pizze in evidenza e dalle altre visibili.
+- **Orari settimanali** con indicatore di apertura calcolato nel fuso `Europe/Rome`.
+- **Contatti** con collegamenti a telefono, WhatsApp quando configurato, Google Maps e Just Eat.
+- **Galleria dello staff** con foto, didascalie e una foto in evidenza come prima immagine del carosello.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🔐 Area riservata
 
-## Agentic Development
+| Ruolo | Funzioni |
+| --- | --- |
+| **Titolare** | Gestisce menù, prezzi, orari, contatti e foto. Seleziona le pizze in evidenza e la pizza della casa, controlla la visibilità della galleria e amministra i collaboratori. |
+| **Collaboratore** | Aggiorna prodotti, prezzi, visibilità, orari, numeri di contatto e fotografie. Può modificare il proprio profilo e la propria password. |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Il titolare crea gli inviti dal pannello. Ogni link di attivazione vale **48 ore** e si usa una sola volta. Il titolare può sospendere o riattivare un collaboratore e impostargli una nuova password.
+
+## 🧩 Architettura e API
+
+**Laravel 13** gestisce la logica applicativa, la validazione, i permessi e la persistenza con Eloquent. Una vista **Blade** carica l'interfaccia **Vue 3**, sviluppata con **Bootstrap 5** e compilata con **Vite**. Il frontend legge il menù e gli orari tramite API JSON.
+
+| Metodo e percorso | Dati pubblici |
+| --- | --- |
+| `GET /api/pizzas` | Pizze al trancio e in teglia visibili, con prezzi e stato in evidenza. |
+| `GET /api/menu-items` | Pizze rotonde, sfizi e bibite visibili. |
+| `GET /api/opening-hours` | Giorni e fasce orarie di apertura. |
+| `GET /api/contact` | Indirizzo e numeri di contatto della pizzeria. |
+| `GET /api/staff-photos` | Foto visibili della galleria dello staff. |
+| `GET /api/staff-gallery` | Visibilità della galleria sul sito pubblico. |
+
+Il pannello usa la sessione di Laravel. Le richieste di modifica passano attraverso la protezione CSRF e i controlli di ruolo previsti per l'operazione. Un esempio è `PATCH /api/staff/pizzas/{pizza}/featured`, riservato al titolare.
+
+| Nel repository | Contenuto |
+| --- | --- |
+| [resources/js](resources/js) | Componenti Vue del sito pubblico e del pannello. |
+| [routes/api.php](routes/api.php) e [routes/web.php](routes/web.php) | API pubbliche, pagine, sessione e operazioni del pannello. |
+| [database](database) | Migrazioni, factory e dati iniziali. |
+| [tests](tests) | Test di funzionalità e unitari. |
+
+## ⚙️ Avvio in locale
+
+**Requisiti** · PHP **8.4.1 o superiore** per le dipendenze bloccate in `composer.lock`, Composer 2, Node.js **22.12 o superiore**, npm e MySQL con l'estensione `pdo_mysql`. Per usare SQLite in locale o eseguire i test, abilita `pdo_sqlite`.
+
+### 1. Installa le dipendenze
+
+Dalla cartella che contiene `artisan` esegui questi comandi.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm ci
+php -r "file_exists('.env') || copy('.env.example', '.env');"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Configura il database
 
-## Contributing
+Crea un database MySQL vuoto chiamato `dal_biondo` oppure usa il nome scelto da te. Aggiorna il file `.env` con i valori del tuo ambiente.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+APP_URL=http://127.0.0.1:8000
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=dal_biondo
+DB_USERNAME=utente_mysql
+DB_PASSWORD="password_mysql"
+```
 
-## Code of Conduct
+Per una prova con SQLite, mantieni `DB_CONNECTION=sqlite` nel file `.env` appena copiato, imposta lo stesso `APP_URL` e crea il database locale.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
+```
 
-## Security Vulnerabilities
+Il repository usa `.env.example` come modello di configurazione. I file dell'ambiente, i database SQLite locali, le dipendenze scaricate e gli asset di build sono esclusi da Git tramite `.gitignore`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. Inizializza l'applicazione
 
-## License
+Al primo avvio genera la chiave e carica i dati iniziali. Crea poi l'account titolare scegliendo nome, e-mail e una password di almeno 12 caratteri. Il link allo storage rende disponibili le foto caricate dal pannello.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan key:generate
+php artisan migrate --seed
+php artisan app:create-owner
+php artisan storage:link
+```
+
+### 4. Avvia Laravel e Vite
+
+Esegui `php artisan serve` in un terminale e `npm run dev` in un secondo terminale, entrambi nella radice del progetto.
+
+[Sito pubblico in locale](http://127.0.0.1:8000/) · [Pannello in locale](http://127.0.0.1:8000/area-riservata)
+
+## 🧪 Test
+
+La suite usa SQLite in memoria. Copre l'accesso e l'uscita dal pannello, gli inviti, i permessi, la visibilità del menù, la selezione delle pizze in evidenza e la validazione degli orari.
+
+```bash
+npm run build
+php artisan test
+```
+
+## 👤 Autore
+
+Sviluppato da **Melvin Rosales**. [Portfolio](https://melvinrosales.com/)

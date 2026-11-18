@@ -1,13 +1,15 @@
 <script setup>
 import { onMounted, ref, computed } from "vue";
 
-import PublicOpeningHours from "./PublicOpeningHours.vue";
+import PublicQuickInfo from "./PublicQuickInfo.vue";
+import PublicMenu from "./PublicMenu.vue";
+import PublicContact from "./PublicContact.vue";
 
 import "bootstrap/js/dist/collapse";
 import "../css/dal-biondo.css";
 
 import "bootstrap/js/dist/modal";
-import PublicPizzaList from "./PublicPizzaList.vue";
+
 import PublicStory from "./PublicStory.vue";
 import PublicReviews from "./PublicReviews.vue";
 
@@ -22,6 +24,9 @@ const openingLabels = {
 };
 
 const pizzas = ref([]);
+const menuItems = ref([]);
+const contact = ref({});
+const staffGalleryVisible = ref(false);
 
 const previewPizzas = computed(() => {
     const house = pizzas.value.filter((pizza) => pizza.is_house_pizza);
@@ -37,23 +42,43 @@ const previewPizzas = computed(() => {
 const loading = ref(true);
 const error = ref("");
 
+async function fetchMenu(path) {
+    const response = await fetch(path, { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("Risposta del menù non valida.");
+    return data;
+}
+
+async function loadContact() {
+    const response = await fetch("/api/contact", { headers: { Accept: "application/json" } });
+    if (response.ok) contact.value = await response.json() ?? {};
+}
+
+async function loadStaffGallery() {
+    const response = await fetch("/api/staff-gallery", { headers: { Accept: "application/json" } });
+    if (response.ok) staffGalleryVisible.value = (await response.json())?.is_visible === true;
+}
+
 onMounted(async () => {
-    try {
-        const response = await fetch("/api/pizzas", {
-            headers: { Accept: "application/json" },
-        });
+    void loadContact().catch(() => {});
+    void loadStaffGallery().catch(() => {});
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+    const [slices, extras] = await Promise.allSettled([
+        fetchMenu("/api/pizzas"),
+        fetchMenu("/api/menu-items"),
+    ]);
 
-        pizzas.value = await response.json();
-    } catch {
-        error.value =
-            "Impossibile caricare il menù. Ricarica la pagina e riprova.";
-    } finally {
-        loading.value = false;
+    if (slices.status === "fulfilled") pizzas.value = slices.value;
+    if (extras.status === "fulfilled") menuItems.value = extras.value;
+
+    if (slices.status === "rejected" && extras.status === "rejected") {
+        error.value = "Impossibile caricare il menù. Ricarica la pagina e riprova.";
+    } else if (slices.status === "rejected" || extras.status === "rejected") {
+        error.value = "Una parte del menù non è disponibile. Ricarica la pagina e riprova.";
     }
+    loading.value = false;
 });
 </script>
 
@@ -98,7 +123,7 @@ onMounted(async () => {
                     <li class="nav-item">
                         <a class="nav-link" href="#ordinare">Come ordinare</a>
                     </li>
-                    <li class="nav-item">
+                    <li v-if="staffGalleryVisible" class="nav-item">
                         <a class="nav-link" href="#storia">La nostra storia</a>
                     </li>
                     <li class="nav-item">
@@ -107,10 +132,11 @@ onMounted(async () => {
                     <li class="nav-item">
                         <a class="nav-link" href="#contatti">Dove siamo</a>
                     </li>
-                    <li class="nav-item ms-md-3">
-                        <a class="nav-link phone-nav" href="tel:+390266040662"
-                            >02 6604 0662</a
-                        >
+                    <li v-if="contact.phone_href" class="nav-item ms-md-3">
+                        <a class="nav-link phone-nav" :href="contact.phone_href">{{ contact.phone }}</a>
+                    </li>
+                    <li v-if="contact.whatsapp_url" class="nav-item">
+                        <a class="nav-link" :href="contact.whatsapp_url">WhatsApp</a>
                     </li>
                 </ul>
             </div>
@@ -197,110 +223,31 @@ onMounted(async () => {
             >
         </section>
 
-        <section
-            id="menu"
-            class="menu-section section-pad"
-            aria-labelledby="menu-title"
-        >
-            <div class="container">
-                <div class="section-heading text-center mx-auto mb-4">
-                    <h2 id="menu-title">Il menù di Dal Biondo</h2>
-                    <div
-                        class="ornament d-flex align-items-center justify-content-center text-primary"
-                        aria-hidden="true"
-                    >
-                        <span class="d-block"></span>◆<span
-                            class="d-block"
-                        ></span>
-                    </div>
-                    <p>Le nostre pizze al trancio e in teglia.</p>
-                </div>
+        <PublicQuickInfo :contact="contact" />
 
-                <div class="menu-content mx-auto">
-                    <p v-if="loading" class="text-center" role="status">
-                        Caricamento del menù…
-                    </p>
-                    <p
-                        v-else-if="error"
-                        class="alert alert-danger"
-                        role="alert"
-                    >
-                        {{ error }}
-                    </p>
-                    <p v-else-if="pizzas.length === 0" class="text-center">
-                        Il menù è in aggiornamento.
-                    </p>
+        <PublicMenu
+            :pizzas="pizzas"
+            :preview-pizzas="previewPizzas"
+            :menu-items="menuItems"
+            :contact="contact"
+            :loading="loading"
+            :error="error"
+        />
 
-                    <template v-else>
-                        <PublicPizzaList :pizzas="previewPizzas" />
-
-                        <div class="menu-complete-action text-center">
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#menu-completo"
-                                aria-haspopup="dialog"
-                                aria-controls="menu-completo"
-                            >
-                                Vedi la carta completa
-                            </button>
-                        </div>
-
-                        <Teleport to="body">
-                            <div
-                                id="menu-completo"
-                                class="modal fade menu-modal"
-                                tabindex="-1"
-                                aria-labelledby="menu-completo-title"
-                                aria-hidden="true"
-                            >
-                                <div
-                                    class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down"
-                                >
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h2
-                                                id="menu-completo-title"
-                                                class="modal-title"
-                                            >
-                                                La carta completa
-                                            </h2>
-                                            <button
-                                                type="button"
-                                                class="btn btn-outline-primary menu-modal-close"
-                                                data-bs-dismiss="modal"
-                                            >
-                                                Chiudi
-                                            </button>
-                                        </div>
-
-                                        <div class="modal-body">
-                                            <PublicPizzaList :pizzas="pizzas" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Teleport>
-                    </template>
-                </div>
-            </div>
-        </section>
-
-        <section
+      <section
             id="ordinare"
             class="order-section"
             aria-labelledby="order-title"
         >
             <div
-                class="container order-strip d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 gap-md-4 text-center text-md-start"
+                class="container order-strip d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3 gap-lg-4 text-center text-lg-start"
             >
                 <h2 id="order-title" class="mb-0">Hai scelto la tua pizza?</h2>
 
                 <div
-                    class="order-actions d-flex flex-column flex-sm-row flex-shrink-0 gap-2 gap-sm-3"
+                    class="order-actions d-flex flex-column flex-sm-row flex-wrap justify-content-center justify-content-lg-end gap-2 gap-sm-3"
                 >
-                    <a class="btn btn-primary" href="tel:+390266040662">
+                    <a v-if="contact.phone_href" class="btn btn-primary" :href="contact.phone_href">
                         Chiama per ordinare
                         <span class="arrow" aria-hidden="true">
                             <svg viewBox="0 0 16 16">
@@ -310,7 +257,17 @@ onMounted(async () => {
                     </a>
 
                     <a
-                        class="btn btn-outline-primary"
+                        v-if="contact.whatsapp_url"
+                        class="btn"
+                        :class="contact.phone_href ? 'btn-outline-primary' : 'btn-primary'"
+                        :href="contact.whatsapp_url"
+                    >
+                        Scrivici su WhatsApp
+                    </a>
+
+                    <a
+                        class="btn"
+                        :class="contact.phone_href || contact.whatsapp_url ? 'btn-outline-primary' : 'btn-primary'"
                         href="https://www.justeat.it/restaurants-pizzeriaaltranciodalbiondo/menu"
                     >
                         Ordina su Just Eat
@@ -324,49 +281,15 @@ onMounted(async () => {
             </div>
         </section>
 
+        <PublicStory v-if="staffGalleryVisible" />
+
+  
+
         <PublicReviews />
 
-        <PublicStory />
+        <PublicContact :contact="contact" @status-change="openingState = $event" />
 
-        <section
-            id="contatti"
-            class="contact-section section-pad"
-            aria-labelledby="contact-title"
-        >
-            <div class="container">
-                <div class="row gy-5 gx-lg-5">
-                    <div class="col-lg-5">
-                        <h2 id="contact-title">Dove siamo</h2>
-
-                        <address>
-                            Via Sant’Antonio 13<br />
-                            20092 Cinisello Balsamo (MI)
-                        </address>
-
-                        <a
-                            class="text-link"
-                            href="https://www.google.com/maps/place/Pizza+Al+Trancio+Dal+Biondo/@45.55222,9.2225842,17z/data=!3m1!4b1!4m6!3m5!1s0x4786b8c867cb1fab:0xa2150dd7150b54c1!8m2!3d45.55222!4d9.2225842!16s%2Fg%2F11ddwxwltz?entry=ttu"
-                        >
-                            Indicazioni su Google Maps
-                        </a>
-                    </div>
-
-                    <div class="col-lg-6 offset-lg-1">
-                        <PublicOpeningHours
-                            id="orari"
-                            @status-change="openingState = $event"
-                        />
-
-                        <a
-                            class="contact-phone d-inline-block text-decoration-none"
-                            href="tel:+390266040662"
-                        >
-                            02 6604 0662
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
+        
     </main>
 
     <footer class="site-footer">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,11 +19,12 @@ class SessionController extends Controller
         ]);
 
         $password = $credentials['password'];
+        $guard = Auth::guard('web');
 
         if (
             strlen($password) > 72 ||
             str_contains($password, "\0") ||
-            ! Auth::guard('web')->attempt($credentials)
+            ! $guard->attempt([...$credentials, 'is_active' => true])
         ) {
             return response()->json([
                 'message' => 'Email o password non validi.',
@@ -30,6 +32,7 @@ class SessionController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->put(User::SESSION_ACCESS_VERSION, $guard->user()->staff_access_version);
 
         return $this->show($request);
     }

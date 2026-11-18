@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Rules\ValidPasswordBytes;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -25,8 +27,8 @@ class CreateOwner extends Command implements Isolatable
         }
 
         $data = [
-            'name' => $this->ask('Nome del titolare'),
-            'email' => $this->ask('Email del titolare'),
+            'name' => trim((string) $this->ask('Nome del titolare', 'Dal Biondo')),
+            'email' => Str::lower(trim((string) $this->ask('Email del titolare', 'admin20092@dalbiondo.it'))),
             'password' => $this->secret('Password (minimo 12 caratteri)', false),
             'password_confirmation' => $this->secret('Conferma la password', false),
         ];
@@ -34,17 +36,11 @@ class CreateOwner extends Command implements Isolatable
         $validator = Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
+            'password' => ['bail', 'required', 'string', 'min:12', new ValidPasswordBytes, 'confirmed'],
         ]);
 
         if ($validator->fails()) {
             $this->error($validator->errors()->first());
-
-            return self::FAILURE;
-        }
-
-        if (strlen($data['password']) > 72) {
-            $this->error('La password deve occupare al massimo 72 byte.');
 
             return self::FAILURE;
         }
