@@ -21,6 +21,13 @@
 /storage/*.key
 /storage/pail
 /vendor
+/app.zip
+/public/build.zip
+
+/AGENTS.md
+/CLAUDE.md
+
+
 _ide_helper.php
 Homestead.json
 Homestead.yaml
